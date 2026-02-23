@@ -15,6 +15,10 @@ public class ResponseRepo {
         this.responses = ResponseRepo.loadResponses("responses.json");
     }
 
+    public List<Integer> respondents() {
+        return this.responses.stream().map(response -> response.respondent).distinct().toList();
+    }
+
     public List<Response> responsesByRespondent(int respondentId) {
         return this.responses.stream().filter(response -> response.respondent == respondentId).toList();
     }
