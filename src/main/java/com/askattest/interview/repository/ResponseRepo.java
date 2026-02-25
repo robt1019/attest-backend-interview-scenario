@@ -24,7 +24,8 @@ public class ResponseRepo {
     }
 
     public List<Response> responsesByRespondentAndQuestion(int respondentId, int questionId) {
-        return this.responses.stream().filter(response -> response.respondent == respondentId && response.question == questionId).toList();
+        List<Response> responses= this.responses.stream().filter(response -> response.respondent == respondentId && response.question == questionId).toList();
+        return responses;
     }
 
     public List<Response> listResponses() {

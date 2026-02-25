@@ -1,5 +1,6 @@
 package com.askattest.interview.service;
 import com.askattest.interview.models.PayoutByQuestion;
+import com.askattest.interview.models.Question;
 import com.askattest.interview.repository.ResponseRepo;
 import com.askattest.interview.repository.SurveyRepo;
 import org.junit.jupiter.api.Test;
@@ -52,5 +53,30 @@ public class SurveyAnalysisServiceTest {
         assertEquals(19, moneyEarnedByRespondent.getPayoutByRespondent().get(302));
         assertEquals(3, moneyEarnedByRespondent.getPayoutByRespondent().get(303));
 
+    }
+
+    @Test
+    void nextQuestionShouldReturnEndSurveyIfRespondentHasAnsweredAllQuestions() throws IOException {
+        SurveyRepo surveyRepo = new SurveyRepo();
+        ResponseRepo responseRepo = new ResponseRepo();
+        SurveyAnalysisService service = new SurveyAnalysisService(responseRepo, surveyRepo);
+
+        Question startQuestion = service.startQuestion(200);
+
+        Question next = service.nextQuestion(startQuestion, 300);
+        assertEquals("End_Survey", next.text);
+        assertEquals(-1, next.id);
+    }
+
+    @Test
+    void nextQuestionShouldReturnNextQuestionIfUserHasNotAnsweredAllQuestions() throws IOException {
+        SurveyRepo surveyRepo = new SurveyRepo();
+        ResponseRepo responseRepo = new ResponseRepo();
+        SurveyAnalysisService service = new SurveyAnalysisService(responseRepo, surveyRepo);
+
+        Question startQuestion = service.startQuestion(200);
+
+        Question next = service.nextQuestion(startQuestion, 302);
+        assertEquals(109, next.id);
     }
 }

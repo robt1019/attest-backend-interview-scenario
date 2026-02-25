@@ -1,5 +1,6 @@
 package com.askattest.interview;
 
+import com.askattest.interview.models.Question;
 import com.askattest.interview.repository.ResponseRepo;
 import com.askattest.interview.repository.SurveyRepo;
 import com.askattest.interview.service.SurveyAnalysisService;
@@ -25,5 +26,12 @@ public class Main {
         Logger.getGlobal().log(Level.INFO, responses.responsesByRespondent(300).toString());
         Logger.getGlobal().log(Level.INFO, surveyAnalysisService.getQuestionCountByRespondent(200).toString());
         Logger.getGlobal().log(Level.INFO, surveyAnalysisService.getMoneyEarnedByRespondent(200).toString());
+
+        Question startQuestion = surveyAnalysisService.startQuestion(200);
+        for(Integer respondent: responses.respondents()) {
+            Logger.getGlobal().log(Level.INFO,
+                    "Respondent: " + String.valueOf(respondent) + " Next Question: " +
+                            String.valueOf(surveyAnalysisService.nextQuestion(startQuestion, respondent).id));
+        }
     }
 }

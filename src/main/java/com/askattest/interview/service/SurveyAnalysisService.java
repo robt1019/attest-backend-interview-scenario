@@ -12,6 +12,42 @@ public class SurveyAnalysisService {
     private final ResponseRepo responseRepository;
     private final SurveyRepo surveyRepository;
 
+    public Question startQuestion(int surveyId) {
+        return surveyRepository.surveyById(surveyId).questions.getFirst();
+    }
+
+
+    public Question nextQuestion(Question currentQuestion, int respondentId) {
+
+        Response userResponse;
+
+        try {
+            userResponse = this.responseRepository.responsesByRespondentAndQuestion(respondentId, currentQuestion.id).getFirst();
+        } catch (NoSuchElementException e) {
+//        Base case - respondent has not answered question
+//            Return question
+            return currentQuestion;
+        }
+
+//        Base case - answered option.route is null
+//            Return end of survey
+        if (currentQuestion.options.stream().allMatch(o -> o.route == -1)) {
+            Question endOfSurveyQuestion = new Question();
+            endOfSurveyQuestion.text = "End_Survey";
+            endOfSurveyQuestion.id = -1;
+            return endOfSurveyQuestion;
+        }
+
+
+//        Find the next question, call nextQuestion with it
+        Optional<Question> next = surveyRepository.surveyById(200).questions.stream().filter(q -> {
+            return q.id == currentQuestion.options.get(userResponse.choice).route;
+        }).findFirst();
+//        return nextQuestion(respondent answer to current question)
+        return nextQuestion(next.orElseThrow(), respondentId);
+
+    }
+
     public SurveyAnalysisService(ResponseRepo responseRepository, SurveyRepo surveyRepository) {
         this.responseRepository = responseRepository;
         this.surveyRepository = surveyRepository;
