@@ -28,10 +28,17 @@ public class Main {
         Logger.getGlobal().log(Level.INFO, surveyAnalysisService.getMoneyEarnedByRespondent(200).toString());
 
         Question startQuestion = surveyAnalysisService.startQuestion(200);
-        for(Integer respondent: responses.respondents()) {
+
+        for (Integer respondent: responses.respondents()) {
             Logger.getGlobal().log(Level.INFO,
-                    "Respondent: " + String.valueOf(respondent) + " Next Question: " +
-                            String.valueOf(surveyAnalysisService.nextQuestion(startQuestion, respondent).id));
+                    "Respondent: " + respondent + " Next Question: " +
+                            surveyAnalysisService.nextQuestion(startQuestion, respondent).id);
         }
+
+        for (Integer respondent: responses.respondents()) {
+            Logger.getGlobal().log(Level.INFO,"Respondent: " + respondent +
+                    " has questions remaining: " + surveyAnalysisService.getMaxRemainingQuestions(respondent, 200).toString());
+        }
+
     }
 }

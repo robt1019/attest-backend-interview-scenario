@@ -24,13 +24,9 @@ public class SurveyAnalysisService {
         try {
             userResponse = this.responseRepository.responsesByRespondentAndQuestion(respondentId, currentQuestion.id).getFirst();
         } catch (NoSuchElementException e) {
-//        Base case - respondent has not answered question
-//            Return question
             return currentQuestion;
         }
 
-//        Base case - answered option.route is null
-//            Return end of survey
         if (currentQuestion.options.stream().allMatch(o -> o.route == -1)) {
             Question endOfSurveyQuestion = new Question();
             endOfSurveyQuestion.text = "End_Survey";
@@ -39,13 +35,38 @@ public class SurveyAnalysisService {
         }
 
 
-//        Find the next question, call nextQuestion with it
-        Optional<Question> next = surveyRepository.surveyById(200).questions.stream().filter(q -> {
-            return q.id == currentQuestion.options.get(userResponse.choice).route;
-        }).findFirst();
-//        return nextQuestion(respondent answer to current question)
+        Optional<Question> next = surveyRepository.surveyById(200).questions.stream()
+                .filter(q -> q.id == currentQuestion.options.get(userResponse.choice).route).findFirst();
         return nextQuestion(next.orElseThrow(), respondentId);
 
+    }
+
+    public Integer getMaxRemainingQuestions(int respondentId, int surveyId) {
+
+        Question firstQuestion = this.startQuestion(surveyId);
+        Question nextQuestion = nextQuestion(firstQuestion, respondentId);
+
+        if (nextQuestion.id == -1) {
+            return 0;
+        }
+
+        return maxRemainingQuestions(nextQuestion, 1);
+    }
+
+    private Integer maxRemainingQuestions(Question currentQuestion, int questionCount) {
+        if (currentQuestion.options.stream().allMatch(o -> o.route == -1)) {
+            return questionCount;
+        }
+        var nextQuestions = currentQuestion.options.stream()
+                .map(option -> option.route)
+                .map(questionId -> surveyRepository.surveyById(200)
+                .questions.stream().filter(question -> question.id == questionId).findFirst())
+                .filter(Optional::isPresent)
+                .map(Optional::get);
+
+        return nextQuestions.map(nq -> maxRemainingQuestions(nq, questionCount + 1))
+                .max(Integer::compareTo)
+                .orElse(questionCount);
     }
 
     public SurveyAnalysisService(ResponseRepo responseRepository, SurveyRepo surveyRepository) {
